@@ -3,7 +3,12 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
+
+	"github.com/alowayed/go-error/service"
+
+	"github.com/alowayed/go-error/data"
+
+	"github.com/alowayed/go-error/errors"
 )
 
 func main() {
@@ -12,22 +17,30 @@ func main() {
 	}
 }
 
-func run() SuperError {
+func run() errors.SuperError {
 
-	return repoErrExample()
+	var err errors.SuperError
 
-	return serviceErrExample()
+	err = repoErrExample()
+	fmt.Printf("\n# Repo\n\n%v\n", err)
 
-	return resourceErrExample()
+	err = serviceErrExample()
+	fmt.Printf("\n# Service\n\n%v\n", err)
+
+	err = resourceErrExample()
+	fmt.Printf("\n# Resource\n\n%v\n", err)
 
 	return nil
 }
 
-func repoErrExample() SuperError {
+// Because of the stacktrace, repository layer errors can simply be
+// passed up the chain without wrapping
+func repoErrExample() errors.SuperError {
 
-	// Error from repo layer. Send up the chain
-	userID := 7
-	_, err := userRepoGetUser(userID)
+	userRepository := data.NewUserRepository()
+
+	userID := int64(7)
+	_, err := userRepository.Find(userID)
 	if err != nil {
 		return err
 	}
@@ -35,32 +48,37 @@ func repoErrExample() SuperError {
 	return nil
 }
 
-func serviceErrExample() SuperError {
+func serviceErrExample() errors.SuperError {
 
-	email := "john@example.com"
-	createSubscriber(email)
+	subscriptionService := service.NewSubscriptionService()
+
+	subscriptionID := int64(7)
+	_, err := subscriptionService.Renew(subscriptionID)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
 
-func resourceErrExample() SuperError {
+func resourceErrExample() errors.SuperError {
 
 	// Error from 3rd party service
-	user := &User{}
-	_, err := authenticate(user)
-	if err != nil {
-		return err
-	}
+	// user := &data.User{}
+	// _, err := auth.authenticate(user)
+	// if err != nil {
+	// 	return err
+	// }
 
 	// How resource layer handlers can check errors causes, and set status
-	switch err.GetCategory() {
-	case CategoryUnauthorized: // Wrong password
-		fmt.Print(http.StatusNotFound) // This is where we set the http status
-		return err
-	case CategoryNotFound: // User not in system
-		fmt.Print(http.StatusNotFound) // This is where we set the http status
-		return err
-	}
+	// switch err.Ca {
+	// case CategoryUnauthorized: // Wrong password
+	// 	fmt.Print(http.StatusNotFound) // This is where we set the http status
+	// 	return err
+	// case CategoryNotFound: // User not in system
+	// 	fmt.Print(http.StatusNotFound) // This is where we set the http status
+	// 	return err
+	// }
 
-	return err
+	return nil
 }
