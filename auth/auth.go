@@ -5,7 +5,7 @@ import (
 	"github.com/alowayed/go-error/errors"
 )
 
-func authenticate(user *data.User) (*string, errors.SuperError) {
+func authenticate(user *data.User) (*string, errors.Error) {
 
 	token, err := oktaAuthenticate(user)
 	if err != nil {

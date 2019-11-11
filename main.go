@@ -3,12 +3,12 @@ package main
 import (
 	"fmt"
 	"log"
-
-	"github.com/alowayed/go-error/service"
+	"net/http"
 
 	"github.com/alowayed/go-error/data"
-
 	"github.com/alowayed/go-error/errors"
+	"github.com/alowayed/go-error/mock"
+	"github.com/alowayed/go-error/service"
 )
 
 func main() {
@@ -17,25 +17,28 @@ func main() {
 	}
 }
 
-func run() errors.SuperError {
+func run() errors.Error {
 
-	var err errors.SuperError
+	var err errors.Error
 
+	fmt.Printf("\n# Repo\n\n")
 	err = repoErrExample()
-	fmt.Printf("\n# Repo\n\n%v\n", err)
+	fmt.Printf("%v\n", err)
 
+	fmt.Printf("\n# Service\n\n")
 	err = serviceErrExample()
-	fmt.Printf("\n# Service\n\n%v\n", err)
+	fmt.Printf("%v\n", err)
 
+	fmt.Printf("\n# Resource\n\n")
 	err = resourceErrExample()
-	fmt.Printf("\n# Resource\n\n%v\n", err)
+	fmt.Printf("%v\n", err)
 
 	return nil
 }
 
 // Because of the stacktrace, repository layer errors can simply be
 // passed up the chain without wrapping
-func repoErrExample() errors.SuperError {
+func repoErrExample() errors.Error {
 
 	userRepository := data.NewUserRepository()
 
@@ -48,7 +51,7 @@ func repoErrExample() errors.SuperError {
 	return nil
 }
 
-func serviceErrExample() errors.SuperError {
+func serviceErrExample() errors.Error {
 
 	subscriptionService := service.NewSubscriptionService()
 
@@ -61,24 +64,29 @@ func serviceErrExample() errors.SuperError {
 	return nil
 }
 
-func resourceErrExample() errors.SuperError {
+func resourceErrExample() errors.Error {
 
-	// Error from 3rd party service
-	// user := &data.User{}
-	// _, err := auth.authenticate(user)
-	// if err != nil {
-	// 	return err
-	// }
+	c := &mock.Context{}
 
-	// How resource layer handlers can check errors causes, and set status
-	// switch err.Ca {
-	// case CategoryUnauthorized: // Wrong password
-	// 	fmt.Print(http.StatusNotFound) // This is where we set the http status
-	// 	return err
-	// case CategoryNotFound: // User not in system
-	// 	fmt.Print(http.StatusNotFound) // This is where we set the http status
-	// 	return err
-	// }
+	userRepository := data.NewUserRepository()
 
+	userID := int64(7)
+	user, err := userRepository.Find(userID)
+	if err != nil {
+
+		// Resource layer can check error category and respond with appropriate HTTP status
+		switch err.Category() {
+		case errors.CategoryNotFound:
+			c.JSON(http.StatusNotFound, err.JsonResponse())
+		case errors.CategoryDBConnDone:
+			c.JSON(http.StatusInternalServerError, err.JsonResponse())
+		case errors.CategoryDBTxDone:
+			c.JSON(http.StatusInternalServerError, err.JsonResponse())
+		}
+
+		return err
+	}
+
+	c.JSON(http.StatusOK, user)
 	return nil
 }

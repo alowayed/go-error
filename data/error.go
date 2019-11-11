@@ -6,8 +6,8 @@ import (
 	"github.com/alowayed/go-error/errors"
 )
 
-// Replace sql.Err with SuperError equivalent
-func categorizeDBError(err error) errors.SuperError {
+// Replace sql.Err with Error equivalent
+func categorizeDBError(err error) errors.Error {
 
 	superErr := errors.New(err, errors.CategoryOther)
 

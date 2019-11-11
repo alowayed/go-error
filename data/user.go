@@ -10,7 +10,7 @@ type (
 	User struct{}
 
 	UserRepository interface {
-		Find(userID int64) (*User, errors.SuperError)
+		Find(userID int64) (*User, errors.Error)
 	}
 
 	SimpleUserRepository struct{}
@@ -20,7 +20,7 @@ func NewUserRepository() UserRepository {
 	return &SimpleUserRepository{}
 }
 
-func (*SimpleUserRepository) Find(userID int64) (*User, errors.SuperError) {
+func (*SimpleUserRepository) Find(userID int64) (*User, errors.Error) {
 
 	user, err := sqlSelectUser(userID)
 	if err != nil {

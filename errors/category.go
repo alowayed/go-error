@@ -21,7 +21,7 @@ const (
 )
 
 // Capture a stacktrace and
-func New(err error, category Category) SuperError {
+func New(err error, category Category) Error {
 
 	// Capture stack
 	stack := []string{}
@@ -33,10 +33,10 @@ func New(err error, category Category) SuperError {
 		stack = append(stack, fmt.Sprintf("%s %s:%d\n", frame.Function, frame.File, frame.Line))
 	}
 
-	return &Error{
+	return &Err{
 		err:      err,
 		Text:     err.Error(),
 		Stack:    stack,
-		Category: category,
+		category: category,
 	}
 }

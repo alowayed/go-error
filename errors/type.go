@@ -6,28 +6,30 @@ import (
 )
 
 type (
-	Error struct {
+	Err struct {
 		err      error
 		Notify   bool
 		Text     string   `json:"error"`
 		Stack    []string `json:"-"`
-		Category Category
+		category Category
 	}
 
 	Category string
 
-	SuperError interface {
+	Error interface {
 		Error() string
 		String() string
-		WithInfo(fmt string, args ...interface{}) SuperError
+		WithInfo(fmt string, args ...interface{}) Error
+		Category() Category
+		JsonResponse() interface{}
 	}
 )
 
-func (e *Error) Error() string {
+func (e *Err) Error() string {
 	return e.String()
 }
 
-func (e *Error) String() string {
+func (e *Err) String() string {
 
 	prefix := "[WARN]"
 	if e.Notify {
@@ -37,8 +39,21 @@ func (e *Error) String() string {
 	return fmt.Sprintf(prefix+" %v \n%v", e.Text, strings.Join(e.Stack, ""))
 }
 
-func (e *Error) WithInfo(format string, args ...interface{}) SuperError {
+func (e *Err) WithInfo(format string, args ...interface{}) Error {
 	format = e.Text + ": " + format
 	e.Text = fmt.Sprintf(format, args...)
 	return e
+}
+
+func (e *Err) Category() Category {
+	return e.category
+}
+
+func (e *Err) JsonResponse() interface{} {
+
+	return map[string]interface{}{
+		"error":        e.err.Error(),
+		"errorMessage": e.Text,
+	}
+
 }

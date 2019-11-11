@@ -10,7 +10,7 @@ type (
 	Subscription struct{}
 
 	SubscriptionService interface {
-		Renew(subscriptionID int64) (*Subscription, errors.SuperError)
+		Renew(subscriptionID int64) (*Subscription, errors.Error)
 	}
 
 	SimpleSubscriptionService struct{}
@@ -20,7 +20,7 @@ func NewSubscriptionService() SubscriptionService {
 	return &SimpleSubscriptionService{}
 }
 
-func (*SimpleSubscriptionService) Renew(subscriptionID int64) (*Subscription, errors.SuperError) {
+func (*SimpleSubscriptionService) Renew(subscriptionID int64) (*Subscription, errors.Error) {
 
 	// Get subscription from repo layer
 	// More business logic
@@ -39,7 +39,7 @@ func stripeCharge(stripeCustomerID int64, amount int) error {
 	return goErrors.New("stripe insufficient funds")
 }
 
-func categorizeStripeError(err error) errors.SuperError {
+func categorizeStripeError(err error) errors.Error {
 
 	superErr := errors.New(err, errors.CategoryOther)
 
