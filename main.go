@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/alowayed/go-error/data"
@@ -12,12 +11,6 @@ import (
 )
 
 func main() {
-	if err := run(); err != nil {
-		log.Fatalf("%+v\n", err)
-	}
-}
-
-func run() errors.Error {
 
 	var err errors.Error
 
@@ -33,7 +26,6 @@ func run() errors.Error {
 	err = resourceErrExample()
 	fmt.Printf("%v\n", err)
 
-	return nil
 }
 
 // Because of the stacktrace, repository layer errors can simply be
